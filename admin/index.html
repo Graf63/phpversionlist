@@ -74,18 +74,22 @@ $sock->set_login($_SERVER['USER']);
 $sock->query('/CMD_API_SYSTEM_INFO');
 $systemInfo = $sock->fetch_parsed_body();
 
+// Colorize all PHP versions (1-9)
 $systemInfo['php']  = colorize($systemInfo['php']);
 $systemInfo['php2'] = colorize(isset($systemInfo['php2']) ? $systemInfo['php2'] : '');
 $systemInfo['php3'] = colorize(isset($systemInfo['php3']) ? $systemInfo['php3'] : '');
 $systemInfo['php4'] = colorize(isset($systemInfo['php4']) ? $systemInfo['php4'] : '');
-//TODO: activate once you don't support PHP 5 anymore!
-//$systemInfo['php2'] = colorize($systemInfo['php2'] ?? '');
-//$systemInfo['php3'] = colorize($systemInfo['php3'] ?? '');
-//$systemInfo['php4'] = colorize($systemInfo['php4'] ?? '');
+$systemInfo['php5'] = colorize(isset($systemInfo['php5']) ? $systemInfo['php5'] : '');
+$systemInfo['php6'] = colorize(isset($systemInfo['php6']) ? $systemInfo['php6'] : '');
+$systemInfo['php7'] = colorize(isset($systemInfo['php7']) ? $systemInfo['php7'] : '');
+$systemInfo['php8'] = colorize(isset($systemInfo['php8']) ? $systemInfo['php8'] : '');
+$systemInfo['php9'] = colorize(isset($systemInfo['php9']) ? $systemInfo['php9'] : '');
 
 /**
- *
- * value should be string that is passed!
+ * Traduire la valeur du sélecteur vers la version PHP correspondante
+ * @param string $phpEnabled État d'activation de PHP
+ * @param string $value Valeur du sélecteur
+ * @return string|null Version PHP formatée ou null
  */
 function translateValueToVersion($phpEnabled, $value)
 {
@@ -95,16 +99,16 @@ function translateValueToVersion($phpEnabled, $value)
         return;
     }
 
-    if ($value === '1') {
-        return $systemInfo['php'];
-    } elseif ($value === '2') {
-        return $systemInfo['php2'];
-    } elseif ($value === '3') {
-        return $systemInfo['php3'];
-    } elseif ($value === '4') {
-        return $systemInfo['php4'];
-    } elseif ($value === '0') {
+    if ($value === '0') {
         return 'Off';
+    }
+    
+    // Gestion dynamique des versions PHP 1-9
+    if (is_numeric($value) && $value >= 1 && $value <= 9) {
+        $phpKey = ($value == 1) ? 'php' : 'php' . $value;
+        if (isset($systemInfo[$phpKey]) && !empty($systemInfo[$phpKey])) {
+            return $systemInfo[$phpKey];
+        }
     }
 
     return;
@@ -134,8 +138,10 @@ foreach ($matches[0] as $k => $v) {
 // also a second correction will be done if the php variable has the value OFF, unset all other variables from the data array.
 foreach ($list as $user => $domains) {
     foreach ($domains as $domain => $data) {
-        if ($data['php'] === 'ON' && !key_exists('php1_select', $data)) {
-            $data['php1_select']  = '1';
+        if ($data['php'] === 'ON') {
+            if (!key_exists('php1_select', $data)) {
+                $data['php1_select'] = '1';
+            }
             $list[$user][$domain] = $data;
         } else {
             if ($data['php'] === 'OFF') {
@@ -145,16 +151,10 @@ foreach ($list as $user => $domains) {
     }
 }
 
-/*
-// make the values unique
-$params = array_unique($params);
-var_dump($params);
-*/
-
 $keys        = array_keys($systemInfo);
-$versionKeys = preg_grep('/^php([2-4]?)$/', $keys);
+$versionKeys = preg_grep('/^php([2-9]?)$/', $keys);
 
-// build an array with key the php install id (1, .., 4) and as value the php version
+// build an array with key the php install id (1, .., 9) and as value the php version
 $phpVersions = [];
 foreach ($versionKeys as $keyValue) {
     $num = substr($keyValue, -1, 1);
@@ -167,7 +167,7 @@ uasort($phpVersions, 'phpVersionCompare');
 // create a multidimensional array with first key the first / second php selector and as second key the phpversion (key)
 $stats = [];
 for ($i = 1; $i <= 2; $i++) {
-    for ($j = 1; $j <= 4; $j++) {
+    for ($j = 1; $j <= 9; $j++) {
         $stats[$i][$j] = 0;
     }
 }
