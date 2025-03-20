@@ -1,6 +1,7 @@
 # PHP version list plugin for DA
 
 **Evo for 9 versions of php**
+_test on DirectAdmin 1.674_
 
 This is a plugin written for DirectAdmin to list all the used PHP versions by the users.  
 The interface is using Bootstrap.
