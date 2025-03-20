@@ -1,5 +1,7 @@
 # PHP version list plugin for DA
 
+**Evo for 9 versions of php**
+
 This is a plugin written for DirectAdmin to list all the used PHP versions by the users.  
 The interface is using Bootstrap.
 
@@ -13,7 +15,7 @@ And a detailed overview of which PHP version(s) are used per domain.
 * PHP 7.4 and up
 * Custombuild 2.0 (for the different PHP versions installation)
 * Minimum 2 different installed PHP versions (else this plugin is not useful for you)
-* Maximum 4 different installed PHP versions (via Custombuild 2.0)
+* Maximum 9 different installed PHP versions (via Custombuild 2.0)
 
 ## Installation
 
